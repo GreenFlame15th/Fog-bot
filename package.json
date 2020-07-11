@@ -1,16 +1,27 @@
 {
-  "name": "greenmaid",
-  "version": "1.0.0",
-  "main": "index.js",
+  "name": "discordjs-bot",
+  "version": "1.1.0",
+  "description": "A Discord.js bot which uses a Command Handler",
+  "main": "node index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node bot.js"
   },
-  "author": "GreenFlame#5002",
-  "license": "ISC",
   "dependencies": {
-    "discord.js": "^11.5.1",
-    "dotenv": "^8.2.0"
+    "discord.js": "^11.6.4",
+    "express": "^4.17.1",
+    "humanize-duration": "^3.23.1",
+    "unb-api": "^1.1.0"
   },
-  "devDependencies": {},
-  "description": ""
+  "engines": {
+    "node": "14.5.0"
+  },
+  "repository": {
+    "url": "https://glitch.com/edit/#!/hello-express"
+  },
+  "license": "MIT",
+  "keywords": [
+    "node",
+    "glitch",
+    "express"
+  ]
 }

@@ -1,0 +1,44 @@
+const Discord = module.require("discord.js");
+
+module.exports.run = (client, newMember) => {
+  let nsfw = false;
+
+  if (
+    newMember.roles.find(r => r.name === "Need NSFW") ||
+    newMember.roles.find(r => r.name === "Want NSFW") ||
+    newMember.roles.find(r => r.name === "Good Either Way") ||
+    newMember.roles.find(r => r.name === "Ok, would rather not.")
+  ) {
+    nsfw = true;
+  } else {
+  }
+
+  function update(member, nsfw, add, requier) {
+    if (
+      nsfw &&
+      member.roles
+        .array()
+        .includes(member.guild.roles.find(r => r.name === requier)) &&
+      !member.roles
+        .array()
+        .includes(member.guild.roles.find(r => r.name === add))
+    ) {
+      member.addRole(member.guild.roles.find(r => r.name === add));
+    }
+    if (
+      (!nsfw ||
+        !member.roles
+          .array()
+          .includes(member.guild.roles.find(r => r.name === requier))) &&
+      member.roles
+        .array()
+        .includes(member.guild.roles.find(r => r.name === add))
+    ) {
+      member.removeRole(member.guild.roles.find(r => r.name === add));
+    }
+  }
+
+  update(newMember, nsfw, "Nude", "Real Human Person");
+  update(newMember, nsfw, "GreenMaidHaremNSFW", "GreenMaidHarem");
+  update(newMember, nsfw, "NSFW RPs", "RPs");
+};

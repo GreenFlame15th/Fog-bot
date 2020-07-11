@@ -1,0 +1,145 @@
+const Discord = require("discord.js");
+const client = new Discord.Client();
+const fs = require("fs");
+const http = require("http");
+const express = require("express");
+const app = express();
+const db = require("quick.db");
+
+const discord_token = process.env.TOKEN;
+const prefix = process.env.PREFIX;
+
+client.on("ready", () => {
+  console.log("Connected!");
+});
+
+app.get("/", (request, response) => {
+  console.log("Ping received!");
+  response.sendStatus(200);
+});
+
+// This keeps the bot running 24/7
+app.listen(process.env.PORT);
+setInterval(() => {
+  http.get(`http://${process.env.PROJECT_DOMAIN}.glitch.me/`);
+}, 280000);
+
+client.on("message", message => {
+  //logs messages from bot_spam channels
+  if (message.channel.id == 630827093911142411) {
+    let channel = client.channels.get("648905361343905802"); //
+    channel.send(
+      `**${message.author.tag}** ${message.content}(*${message.author.id}*)`
+    );
+    channel.send(`---------------------------------`);
+  }
+
+  //say commamd cam be used anywhere and allow talking as the bot
+  if (
+    message.member.hasPermission(["MANAGE_MESSAGES"]) &&
+    message.content.startsWith(`${prefix} say `) &&
+    !message.author.bot
+  ) {
+    message.channel.send(message.content.slice(8));
+    message.delete(1000);
+  }
+
+  //list of channels for wor works in
+  let channels = [
+    "648042254031912971", //test
+    "630827093911142411", //bot spam
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+  ];
+  if (!channels.includes(message.channel.id)) return;
+
+  //looks for commands from humans
+  if (message.author.bot) return;
+  if (
+    message.content.indexOf(prefix) == 0 &&
+    message.channel.id == 630827093911142411 //bot spam
+  ) {
+    // This is the best way to define args. Trust me.
+    const args = message.content
+      .slice(prefix.length)
+      .trim()
+      .split(/ +/g);
+    const command = args.shift().toLowerCase();
+
+    // The list of if/else is replaced with those simple 2 lines:
+    try {
+      let commandFile = require(`./commands/${command}.js`);
+      commandFile.run(client, message, args);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+  //non-FoG-commans from humans
+  else {
+    //Don't run anything with FoG, as it likely is a misspelling of a command
+    if (message.content.startsWith(`${prefix} `)) return;
+
+    //setting the args
+    const args = message.content.trim().split(/ +/g);
+    const start = args.shift().toLowerCase();
+
+    //simular to handle before but using args without prefix
+    try {
+      let startFile = require(`./start/${start}.js`);
+      startFile.run(client, message, args);
+    } catch (err) {
+      console.error(err);
+    }
+
+    //list of channels for wor works in
+    let starts = ["ping", "pong", "", "", "", "", "", "", "", "", "", ""];
+    if (message.content.startsWith(starts)) return;
+
+    //key word re-act system
+
+    //deffining reply with values for: (0)weight, (1)keyword(d=default and will always be added), (2)starts/contains(s/c), (3)added(0 default), (4)reply(string)
+    let reply = [
+      [100, `d`, `d`, 0, `1`],
+      [1000, `test`, `starts`, 0, `tested`]
+      [1000, `o`, `contains`, 0, `detected!`]
+    ];
+    
+    //getting varables
+    const mtext = message.content.toLowerCase();
+    let n = 0;
+    let i;
+
+    //adding replys that meet requiermants
+    for (i = 0; i < reply.length; i++) {
+      if (
+        reply[i][1] == `d` ||
+        (reply[i][2] == `starts` && mtext.includes(reply[i][1])) ||
+        (reply[i][2] == `contains` && mtext.startsWith(reply[i][1]))
+      )
+        reply[i][3] == 1;
+      n += reply[i][0];
+    }
+
+    //draw
+    let rn = Math.floor(Math.random() * n);
+
+    //getting message from pool
+    for (i = 0; i < reply.length; i++) {
+      rn -= reply[i][0];
+      if (rn < 0) {
+        message.channel.send(reply[i][4]);
+        return;
+      }
+    }
+  }
+});
+
+client.login(discord_token);
